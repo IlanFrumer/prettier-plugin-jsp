@@ -2,6 +2,7 @@ const { parsers } = require("prettier/parser-html");
 const {
   printer: { printDocToString },
 } = require("prettier").doc;
+const quotation = require("./quotation");
 
 const ESCAPE_TOKEN = "____";
 
@@ -12,7 +13,14 @@ const parser = {
     return text
       .replace(/<%@([\w\W]+?)%>/g, "<JSP $1 />")
       .replace(/<%--([\w\W]+?)--%>/g, "<!-- $1 -->")
-      .replace(/<(\s*\/\s*)?(\w+):(\w)/g, `<$1$2${ESCAPE_TOKEN}$3`);
+      .replace(/<(\s*\/\s*)?(\w+):(\w)/g, `<$1$2${ESCAPE_TOKEN}$3`)
+      .replace(/<([\w]+)([\s\S]*?)>/g, (_, m1, m2) => {
+        const attrs = m2.replace(
+          /\$\{(.+?)\}/,
+          (_, m1) => "${" + quotation.escape(m1) + "}"
+        );
+        return `<${m1} ${attrs}>`;
+      });
   },
 };
 
@@ -54,6 +62,11 @@ const plugin = {
       },
       print: (path, options, print) => {
         const node = path.getValue();
+        if (node.type === "attribute") {
+          node.value = quotation.unescape(node.value);
+          node.name = quotation.unescape(node.name);
+        }
+
         if (node.type === "element" && node.name === "JSP") {
           const res = getPrinter(options).print(path, options, print);
           const txt = printDocToString(res, {

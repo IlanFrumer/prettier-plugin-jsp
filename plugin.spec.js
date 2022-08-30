@@ -59,3 +59,15 @@ it("should format Self-Closing tags", () => {
     '<c:if test="${not empty uncompress}">\n  <br />\n  <hr />\n</c:if>'
   );
 });
+
+it("should format interpolated attributes", () => {
+  expectFormat(
+    "<img src='${a ? 'b' : null}/image.png' />",
+    "<img src=\"${a ? 'b' : null}/image.png\" />"
+  );
+
+  expectFormat(
+    "<option class='test' ${empty selected ? 'selected' : ''}>value</option>",
+    "<option class=\"test\" ${empty selected ? 'selected' : ''}>value</option>"
+  );
+});
