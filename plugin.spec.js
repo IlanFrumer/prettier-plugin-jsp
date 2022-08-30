@@ -53,4 +53,9 @@ it("should format Self-Closing tags", () => {
     '<img    src="${commonResourcePath}/image.png" \n>',
     '<img src="${commonResourcePath}/image.png" />'
   );
+
+  expectFormat(
+    '<c:if test="${not empty uncompress}">\n<br><hr>\n</c:if>',
+    '<c:if test="${not empty uncompress}">\n  <br />\n  <hr />\n</c:if>'
+  );
 });

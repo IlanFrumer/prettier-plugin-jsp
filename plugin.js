@@ -2,19 +2,17 @@ const { parsers } = require("prettier/parser-html");
 const {
   printer: { printDocToString },
 } = require("prettier").doc;
-const { selfClosing } = require("./patterns");
+
+const ESCAPE_TOKEN = "____";
 
 const parser = {
   ...parsers.html,
   astFormat: "jsp",
   preprocess: (text) => {
-    return (
-      text
-        .replace(/<%@([\w\W]+?)%>/g, "<JSP $1 />")
-        .replace(/<%--([\w\W]+?)--%>/g, "<!-- $1 -->")
-        // .replace(/<%([\w\W]+?)%>/g, "<JAVA>$1</JAVA>")
-        .replace(selfClosing, "<$1$2 />")
-    );
+    return text
+      .replace(/<%@([\w\W]+?)%>/g, "<JSP $1 />")
+      .replace(/<%--([\w\W]+?)--%>/g, "<!-- $1 -->")
+      .replace(/<(\s*\/\s*)?(\w+):(\w)/g, `<$1$2${ESCAPE_TOKEN}$3`);
   },
 };
 
@@ -46,8 +44,7 @@ const plugin = {
   printers: {
     jsp: {
       preprocess: (ast, options) => {
-        const printer = getPrinter(options);
-        return printer.preprocess(ast, options);
+        return getPrinter(options).preprocess(ast, options);
       },
       insertPragma: (text) => {
         return "<!-- @format -->\n\n" + text.replace(/^\s*\n/, "");
@@ -67,6 +64,9 @@ const plugin = {
         } else if (node.type === "comment") {
           return `<%-- ${node.value.trim()} --%>`;
         } else {
+          if (node.type === "element" && node.name.includes(ESCAPE_TOKEN)) {
+            node.name = node.name.replace(ESCAPE_TOKEN, ":");
+          }
           return getPrinter(options).print(path, options, print);
         }
       },
