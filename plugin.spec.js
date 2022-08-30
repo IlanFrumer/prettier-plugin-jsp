@@ -15,17 +15,42 @@ const format = (text) =>
 
 const EOF = "\n";
 
+/**
+ * @param {string} text
+ * @param {string} toBe
+ */
+const expectFormat = (text, toBe) => {
+  expect(format(text)).toBe(toBe + EOF);
+};
+
 it("should format JSP Scriptlet tag", () => {
-  expect(format('<%@ page   contentType = "text/html"   %>')).toBe(
-    '<%@ page contentType="text/html" %>' + EOF
+  expectFormat(
+    '<%@ page   contentType = "text/html"   %>',
+    '<%@ page contentType="text/html" %>'
   );
 });
 
 it("should format JSP Comments", () => {
-  expect(format("<%--   This is JSP comment   --%>")).toBe(
-    "<%-- This is JSP comment --%>" + EOF
+  expectFormat(
+    "<%--   This is JSP comment   --%>",
+    "<%-- This is JSP comment --%>"
   );
-  expect(format("<!--   It was a HTML comment   -->")).toBe(
-    "<%-- It was a HTML comment --%>" + EOF
+  expectFormat(
+    "<!--   It was a HTML comment   -->",
+    "<%-- It was a HTML comment --%>"
+  );
+});
+
+it("should format Self-Closing tags", () => {
+  expectFormat(
+    '<link rel="stylesheet" href="${commonResourcePath}/style.css">',
+    '<link rel="stylesheet" href="${commonResourcePath}/style.css" />'
+  );
+
+  expectFormat("<br>", "<br />");
+  expectFormat("<hr>", "<hr />");
+  expectFormat(
+    '<img    src="${commonResourcePath}/image.png" \n>',
+    '<img src="${commonResourcePath}/image.png" />'
   );
 });

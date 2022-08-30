@@ -2,16 +2,19 @@ const { parsers } = require("prettier/parser-html");
 const {
   printer: { printDocToString },
 } = require("prettier").doc;
+const { selfClosing } = require("./patterns");
 
 const parser = {
   ...parsers.html,
   astFormat: "jsp",
   preprocess: (text) => {
-    return text
-      .replace(/<%@([\w\W]+?)%>/g, "<JSP $1 />")
-      .replace(/<%--([\w\W]+?)--%>/g, "<!-- $1 -->")
-      .replace(/<br>/gi, "<br/>");
-    // ”
+    return (
+      text
+        .replace(/<%@([\w\W]+?)%>/g, "<JSP $1 />")
+        .replace(/<%--([\w\W]+?)--%>/g, "<!-- $1 -->")
+        // .replace(/<%([\w\W]+?)%>/g, "<JAVA>$1</JAVA>")
+        .replace(selfClosing, "<$1$2 />")
+    );
   },
 };
 
@@ -50,8 +53,7 @@ const plugin = {
         return "<!-- @format -->\n\n" + text.replace(/^\s*\n/, "");
       },
       embed: (path, print, textToDoc, options) => {
-        const printer = getPrinter(options);
-        return printer.embed(path, print, textToDoc, options);
+        return getPrinter(options).embed(path, print, textToDoc, options);
       },
       print: (path, options, print) => {
         const node = path.getValue();
