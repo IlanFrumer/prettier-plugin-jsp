@@ -62,6 +62,7 @@ it("should format custom tags", () => {
   );
 
   expectFormat("<multi-checkout />", "<multi-checkout />");
+  expectFormat("<multi-checkout:do />", "<multi-checkout:do />");
 });
 
 it("should format interpolated attributes", () => {

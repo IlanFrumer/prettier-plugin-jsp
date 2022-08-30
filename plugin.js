@@ -3,11 +3,9 @@ const {
   printer: { printDocToString },
 } = require("prettier").doc;
 const quotation = require("./quotation");
+const tag = require("./tag");
 
-const ESCAPE_TAG_COLON = "__colon__";
-const ESCAPE_TAG_DASH = "__dash__";
-const ESCAPE_TAG_COLON_REGEX = /<(\s*\/\s*)?(\w+):(\w)/g;
-const ESCAPE_TAG_DASH_REGEX = /<(\s*\/\s*)?(\w+)-(\w)/g;
+const ESCAPE_TAG_REGEX = /<(\s*\/\s*)?([\w:-]+)/g;
 const ESCAPE_JSP_TAG_REGEX = /<%@([\w\W]+?)%>/g;
 const ESCAPE_JSP_COMMENT_REGEX = /<%--([\w\W]+?)--%>/g;
 const ESCAPE_ATTRS_REGEX = /<([\w]+)([\s\S]*?)>/g;
@@ -20,8 +18,7 @@ const parser = {
     return text
       .replace(ESCAPE_JSP_TAG_REGEX, "<JSP $1 />")
       .replace(ESCAPE_JSP_COMMENT_REGEX, "<!-- $1 -->")
-      .replace(ESCAPE_TAG_COLON_REGEX, `<$1$2${ESCAPE_TAG_COLON}$3`)
-      .replace(ESCAPE_TAG_DASH_REGEX, `<$1$2${ESCAPE_TAG_DASH}$3`)
+      .replace(ESCAPE_TAG_REGEX, (_, m1, m2) => `<${m1 ?? ""}${tag.escape(m2)}`)
       .replace(ESCAPE_ATTRS_REGEX, (_, m1, m2) => {
         const attrs = m2.replace(
           ESCAPE_ATTR_REGEX,
@@ -70,27 +67,27 @@ const plugin = {
       },
       print: (path, options, print) => {
         const node = path.getValue();
-        if (node.type === "attribute") {
-          node.value = quotation.unescape(node.value);
-          node.name = quotation.unescape(node.name);
+        switch (node.type) {
+          case "attribute":
+            node.value = quotation.unescape(node.value);
+            node.name = quotation.unescape(node.name);
+            break;
+          case "element":
+            node.name = tag.unescape(node.name);
+            if (node.name === "JSP") {
+              const res = getPrinter(options).print(path, options, print);
+              const txt = printDocToString(res, {
+                ...options,
+                printWidth: Infinity,
+              }).formatted;
+              return txt.replace(/^<JSP/, "<%@").replace(/\/>$/, "%>");
+            }
+            break;
+          case "comment":
+            return `<%-- ${node.value.trim()} --%>`;
         }
 
-        if (node.type === "element" && node.name === "JSP") {
-          const res = getPrinter(options).print(path, options, print);
-          const txt = printDocToString(res, {
-            ...options,
-            printWidth: Infinity,
-          }).formatted;
-          return txt.replace(/^<JSP/, "<%@").replace(/\/>$/, "%>");
-        } else if (node.type === "comment") {
-          return `<%-- ${node.value.trim()} --%>`;
-        } else {
-          if (node.type === "element" && node.name.includes(ESCAPE_TAG_COLON))
-            node.name = node.name.replace(ESCAPE_TAG_COLON, ":");
-          if (node.type === "element" && node.name.includes(ESCAPE_TAG_DASH))
-            node.name = node.name.replace(ESCAPE_TAG_DASH, "-");
-          return getPrinter(options).print(path, options, print);
-        }
+        return getPrinter(options).print(path, options, print);
       },
     },
   },

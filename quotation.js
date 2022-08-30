@@ -8,7 +8,7 @@ const RIGHT_SINGLE_QM_REGEX = new RegExp(RIGHT_SINGLE_QM, "g");
 const RIGHT_DOUBLE_QM_REGEX = new RegExp(RIGHT_DOUBLE_QM, "g");
 
 const escapeQuotationMarks = (/** @type {string} */ text) => {
-  if (text == null) return null;
+  if (text == null) return "";
   return text
     .replace(SINGLE_QM_REGEX, RIGHT_SINGLE_QM)
     .replace(DOUBLE_QM_REGEX, RIGHT_DOUBLE_QM);
