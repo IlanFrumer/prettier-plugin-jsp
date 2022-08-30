@@ -13,7 +13,7 @@ parser.preprocess = (text) => {
 };
 
 const getPrinter = (options) => {
-  const plugin = options.plugins.find((d) => d.parsers.html);
+  const plugin = options.plugins.find((p) => p.parsers?.html);
   return plugin.printers.html;
 };
 
