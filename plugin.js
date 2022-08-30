@@ -2,14 +2,17 @@ const { parsers } = require("prettier/parser-html");
 const {
   printer: { printDocToString },
 } = require("prettier").doc;
-const parser = { ...parsers.html, astFormat: "jsp" };
 
-parser.preprocess = (text) => {
-  return text
-    .replace(/<%@([\w\W]+?)%>/g, "<JSP $1 />")
-    .replace(/<%--([\w\W]+?)--%>/g, "<!-- $1 -->")
-    .replace(/<br>/gi, "<br/>");
-  // ”
+const parser = {
+  ...parsers.html,
+  astFormat: "jsp",
+  preprocess: (text) => {
+    return text
+      .replace(/<%@([\w\W]+?)%>/g, "<JSP $1 />")
+      .replace(/<%--([\w\W]+?)--%>/g, "<!-- $1 -->")
+      .replace(/<br>/gi, "<br/>");
+    // ”
+  },
 };
 
 const getPrinter = (options) => {
