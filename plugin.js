@@ -63,9 +63,6 @@ const plugin = {
         return "<!-- @format -->\n\n" + text.replace(/^\s*\n/, "");
       },
       embed: (path, print, textToDoc, options) => {
-        return getPrinter(options).embed(path, print, textToDoc, options);
-      },
-      print: (path, options, print) => {
         const node = path.getValue();
         switch (node.type) {
           case "attribute":
@@ -74,20 +71,23 @@ const plugin = {
             break;
           case "element":
             node.name = tag.unescape(node.name);
-            if (node.name === "JSP") {
-              const res = getPrinter(options).print(path, options, print);
-              const txt = printDocToString(res, {
-                ...options,
-                printWidth: Infinity,
-              }).formatted;
-              return txt.replace(/^<JSP/, "<%@").replace(/\/>$/, "%>");
-            }
-            break;
-          case "comment":
-            return `<%-- ${node.value.trim()} --%>`;
         }
-
-        return getPrinter(options).print(path, options, print);
+        return getPrinter(options).embed(path, print, textToDoc, options);
+      },
+      print: (path, options, print) => {
+        const node = path.getValue();
+        if (node.type === "element" && node.name === "JSP") {
+          const res = getPrinter(options).print(path, options, print);
+          const txt = printDocToString(res, {
+            ...options,
+            printWidth: Infinity,
+          }).formatted;
+          return txt.replace(/^<JSP/, "<%@").replace(/\/>$/, "%>");
+        } else if (node.type === "comment") {
+          return `<%-- ${node.value.trim()} --%>`;
+        } else {
+          return getPrinter(options).print(path, options, print);
+        }
       },
     },
   },

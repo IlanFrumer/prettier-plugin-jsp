@@ -67,12 +67,17 @@ it("should format custom tags", () => {
 
 it("should format interpolated attributes", () => {
   expectFormat(
-    "<img src='${a ? 'b' : null}/image.png' />",
-    "<img src=\"${a ? 'b' : null}/image.png\" />"
+    `<img src='\${a ? 'b' : null}/image.png' />`,
+    `<img src="\${a ? 'b' : null}/image.png" />`
   );
 
   expectFormat(
-    "<option class='test' ${empty selected ? 'selected' : ''}>value</option>",
-    "<option class=\"test\" ${empty selected ? 'selected' : ''}>value</option>"
+    `<option class='test' \${empty selected ? 'selected' : ''}>value</option>`,
+    `<option class="test" \${empty selected ? 'selected' : ''}>value</option>`
+  );
+
+  expectFormat(
+    `<div class="page-wrap \${opticsProduct ? 'optic-product' : '' }"></div>`,
+    `<div class="page-wrap \${opticsProduct ? 'optic-product' : '' }"></div>`
   );
 });
