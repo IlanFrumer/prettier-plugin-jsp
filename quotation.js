@@ -14,11 +14,14 @@ const escapeQuotationMarks = (/** @type {string} */ text) => {
     .replace(DOUBLE_QM_REGEX, RIGHT_DOUBLE_QM);
 };
 
-const unescapeQuotationMarks = (/** @type {string} */ text) => {
+const unescapeQuotationMarks = (
+  /** @type {string} */ text,
+  /** @type {boolean} */ single
+) => {
   if (text == null) return null;
   return text
-    .replace(RIGHT_SINGLE_QM_REGEX, SINGLE_QM)
-    .replace(RIGHT_DOUBLE_QM_REGEX, DOUBLE_QM);
+    .replace(RIGHT_SINGLE_QM_REGEX, single ? DOUBLE_QM : SINGLE_QM)
+    .replace(RIGHT_DOUBLE_QM_REGEX, single ? DOUBLE_QM : SINGLE_QM);
 };
 
 module.exports = {

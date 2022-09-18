@@ -80,4 +80,14 @@ it("should format interpolated attributes", () => {
     `<div class="page-wrap \${opticsProduct ? 'optic-product' : '' }"></div>`,
     `<div class="page-wrap \${opticsProduct ? 'optic-product' : '' }"></div>`
   );
+
+  expectFormat(
+    `<div class='\${(!hasSuperPharmCart && !hasMedicines )?'two-steps':'' }'></div>`,
+    `<div class="\${(!hasSuperPharmCart && !hasMedicines )?'two-steps':'' }"></div>`
+  );
+
+  expectFormat(
+    `<div class='\${(!hasSuperPharmCart && !hasMedicines )?'two-steps':'' }'></div>`,
+    `<div class="\${(!hasSuperPharmCart && !hasMedicines )?'two-steps':'' }"></div>`
+  );
 });
