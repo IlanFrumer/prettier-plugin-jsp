@@ -4,13 +4,15 @@ const plugin = require("./plugin");
 
 /**
  * @param {string} text
+ * @param {boolean} singleQuote
  * @returns {string}
  */
-const format = (text) =>
+const format = (text, singleQuote) =>
   prettier.format(text, {
     parser: "jsp",
     plugins: [plugin],
     pluginSearchDirs: false,
+    singleQuote,
   });
 
 const EOF = "\n";
@@ -20,7 +22,15 @@ const EOF = "\n";
  * @param {string} toBe
  */
 const expectFormat = (text, toBe) => {
-  expect(format(text)).toBe(toBe + EOF);
+  expect(format(text, false)).toBe(toBe + EOF);
+};
+
+/**
+ * @param {string} text
+ * @param {string} toBe
+ */
+const expectFormatSingle = (text, toBe) => {
+  expect(format(text, true)).toBe(toBe + EOF);
 };
 
 it("should format JSP Scriptlet tag", () => {
@@ -81,12 +91,7 @@ it("should format interpolated attributes", () => {
     `<div class="page-wrap \${opticsProduct ? 'optic-product' : '' }"></div>`
   );
 
-  expectFormat(
-    `<div class='\${(!hasSuperPharmCart && !hasMedicines )?'two-steps':'' }'></div>`,
-    `<div class="\${(!hasSuperPharmCart && !hasMedicines )?'two-steps':'' }"></div>`
-  );
-
-  expectFormat(
+  expectFormatSingle(
     `<div class='\${(!hasSuperPharmCart && !hasMedicines )?'two-steps':'' }'></div>`,
     `<div class="\${(!hasSuperPharmCart && !hasMedicines )?'two-steps':'' }"></div>`
   );

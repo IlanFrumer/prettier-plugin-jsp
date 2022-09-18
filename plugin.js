@@ -66,11 +66,11 @@ const plugin = {
         const node = path.getValue();
         switch (node.type) {
           case "attribute":
-            node.value = quotation.unescape(node.value, options.singleQuote);
-            node.name = quotation.unescape(node.name, options.singleQuote);
+            node.value = quotation.unescape(node.value);
+            node.name = quotation.unescape(node.name);
             break;
           case "element":
-            node.name = tag.unescape(node.name, options.singleQuote);
+            node.name = tag.unescape(node.name);
         }
         return getPrinter(options).embed(path, print, textToDoc, options);
       },
