@@ -96,3 +96,10 @@ it("should format interpolated attributes", () => {
     `<div class="\${(!hasSuperPharmCart && !hasMedicines )?'two-steps':'' }"></div>`
   );
 });
+
+it.only("should format interpolated attributes with single quotes", () => {
+  expectFormatSingle(
+    `<input \${store.checked ? 'checked' :   ''} />`,
+    `<input \${store.checked ? 'checked' : ''} />`
+  );
+});

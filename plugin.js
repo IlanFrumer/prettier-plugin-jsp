@@ -71,6 +71,9 @@ const plugin = {
             break;
           case "element":
             node.name = tag.unescape(node.name);
+            break;
+          case "text":
+            node.value = quotation.unescape(node.value);
         }
         return getPrinter(options).embed(path, print, textToDoc, options);
       },
