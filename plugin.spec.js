@@ -49,6 +49,7 @@ it("should format JSP Comments", () => {
     "<!--   It was a HTML comment   -->",
     "<%-- It was a HTML comment --%>"
   );
+  expectFormat("<%-- <div v-if='true'> --%>", "<%-- <div v-if='true'> --%>");
 });
 
 it("should format Self-Closing tags", () => {
@@ -97,9 +98,14 @@ it("should format interpolated attributes", () => {
   );
 });
 
-it.only("should format interpolated attributes with single quotes", () => {
+it("should format interpolated attributes with single quotes", () => {
   expectFormatSingle(
     `<input \${store.checked ? 'checked' :   ''} />`,
     `<input \${store.checked ? 'checked' : ''} />`
+  );
+
+  expectFormatSingle(
+    `<div style="\${cond?'display:block':'display:hidden'}"></div>`,
+    `<div style="\${cond?'display:block':'display:hidden'}"></div>`
   );
 });

@@ -8,7 +8,7 @@ const tag = require("./tag");
 const ESCAPE_TAG_REGEX = /<(\s*\/\s*)?([\w:-]+)/g;
 const ESCAPE_JSP_TAG_REGEX = /<%@([\w\W]+?)%>/g;
 const ESCAPE_JSP_COMMENT_REGEX = /<%--([\w\W]+?)--%>/g;
-const ESCAPE_ATTRS_REGEX = /<([\w]+)([\s\S]*?)>/g;
+const ESCAPE_ATTRS_REGEX = /<([\w]+)\s*([\s\S]*?)>/g;
 const ESCAPE_ATTR_REGEX = /\$\{(.+?)\}/g;
 
 const parser = {
@@ -17,7 +17,7 @@ const parser = {
   preprocess: (text) => {
     return text
       .replace(ESCAPE_JSP_TAG_REGEX, "<JSP $1 />")
-      .replace(ESCAPE_JSP_COMMENT_REGEX, "<!-- $1 -->")
+      .replace(ESCAPE_JSP_COMMENT_REGEX, "<!--$1-->")
       .replace(ESCAPE_TAG_REGEX, (_, m1, m2) => `<${m1 ?? ""}${tag.escape(m2)}`)
       .replace(ESCAPE_ATTRS_REGEX, (_, m1, m2) => {
         const attrs = m2.replace(
@@ -68,12 +68,14 @@ const plugin = {
           case "attribute":
             node.value = quotation.unescape(node.value);
             node.name = quotation.unescape(node.name);
+            if (node.name === style) return node.value;
             break;
           case "element":
             node.name = tag.unescape(node.name);
             break;
           case "text":
             node.value = quotation.unescape(node.value);
+            break;
         }
         return getPrinter(options).embed(path, print, textToDoc, options);
       },
